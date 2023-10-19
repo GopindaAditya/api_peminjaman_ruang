@@ -14,9 +14,19 @@ module.exports = (sequelize, DataTypes) => {
         },
         id_ruangan: {
             type: Sequelize.INTEGER
-        }
-    },{
-        tableName:"jam"
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+    }, {
+        tableName: "jam"
     });
     Jam.belongsTo(Ruangan, { foreignKey: 'id_ruangan' });
+
+    return Jam;
 }
