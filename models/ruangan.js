@@ -1,7 +1,9 @@
-const { DataTypes } = require("sequelize");
+require("sequelize");
 const peminjaman = require("./peminjaman");
+const Users = require('./user'); 
 
-module.exports = (DataTypes, DataTypes) => {
+
+module.exports = (sequelize, DataTypes) => {
     const Ruangan = sequelize.define(
         "Ruangan", {
         id: {
@@ -32,16 +34,16 @@ module.exports = (DataTypes, DataTypes) => {
         tableName: "ruangan"
     }
     );
-    Ruangan.hasMany(sequelize.models.Barang, {
-        foreignKey: 'id_ruangan'
-    });
-    Ruangan.hasMany(sequelize.models.Jam, {
-        foreignKey: 'id_ruangan'
-    });
-    Ruangan.belongsToMany(Users, {
-        through: peminjaman,
-        foreignKey: 'id_ruangan',
-      });
+    // Ruangan.hasMany(sequelize.models.Barang, {
+    //     foreignKey: 'id_ruangan'
+    // });
+    // Ruangan.hasMany(sequelize.models.Jam, {
+    //     foreignKey: 'id_ruangan'
+    // });
+    // Ruangan.belongsToMany(Users, {
+    //     through: peminjaman,
+    //     foreignKey: 'id_ruangan',
+    //   });
       
 
     return Ruangan; 

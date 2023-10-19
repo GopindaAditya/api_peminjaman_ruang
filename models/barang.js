@@ -1,4 +1,6 @@
 const { DataTypes } = require("sequelize");
+const Ruangan = require('./ruangan');
+
 
 module.exports = (sequelize, DataTypes) => {
   const Barang = sequelize.define("Barang", {
@@ -28,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "barang"
     });
 
-  Barang.belongsTo(Ruangan, { foreignKey: 'id_ruangan' });
+  // Barang.belongsTo(Ruangan, { foreignKey: 'id_ruangan' });
 
   return Barang;
 }

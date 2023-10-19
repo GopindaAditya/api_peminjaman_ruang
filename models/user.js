@@ -34,10 +34,10 @@ module.exports=(sequelize, DataTypes)=>{
         tableName:'users'
     });
 
-    Users.belongsToMany(Ruangan, {
-        through: peminjaman,
-        foreignKey: 'id_peminjam',
-      });
+    // Users.belongsToMany(Ruangan, {
+    //     through: peminjaman,
+    //     foreignKey: 'id_peminjam',
+    //   });
     
     return Users;
 }
