@@ -17,7 +17,25 @@ module.exports = {
         }, 
         id_ruangan:{
           type:Sequelize.INTEGER,
-        }
+        },
+        createdAt:{
+          type:Sequelize.DATE,
+          allowNull:false
+        },
+        updatedAt:{
+          type:Sequelize.DATE,
+          allowNull:false
+        },
+      });
+      await queryInterface.addConstraint('barang', {
+        fields: ['id_ruangan'],
+        type: 'foreign key',
+        references: {
+          table: 'ruangan',
+          field: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       });
   },
 

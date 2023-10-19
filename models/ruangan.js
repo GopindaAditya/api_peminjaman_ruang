@@ -34,6 +34,9 @@ module.exports = (DataTypes, DataTypes) => {
     Ruangan.hasMany(sequelize.models.Barang, {
         foreignKey: 'id_ruangan'
     });
+    Ruangan.hasMany(sequelize.models.Jam, {
+        foreignKey: 'id_ruangan'
+    });
 
     return Ruangan; 
 }
