@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var ruanganRouter = require('./routes/ruangan');
 var barangRouter = require('./routes/barang');
+var jamRouter = require('./routes/jam');
 
 var app = express();
 app.use(cors());
@@ -23,5 +24,6 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/ruangan', ruanganRouter);
 app.use('/barang', barangRouter);
+app.use('/jam', jamRouter)
 
 module.exports = app;
