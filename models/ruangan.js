@@ -1,11 +1,12 @@
 require("sequelize");
 const peminjaman = require("./peminjaman");
-const Users = require('./user'); 
+const Users = require('./user');
+const Barang = require('./barang');
 
 
 module.exports = (sequelize, DataTypes) => {
-    const Ruangan = sequelize.define(
-        "Ruangan", {
+
+    const Ruangan = sequelize.define("Ruangan", {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -30,11 +31,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: false
         },
-    },{
+    }, {
         tableName: "ruangan"
-    }
-    );
-    // Ruangan.hasMany(sequelize.models.Barang, {
+    });
+    // Ruangan.hasMany(sequelize.models.barang, {
     //     foreignKey: 'id_ruangan'
     // });
     // Ruangan.hasMany(sequelize.models.Jam, {
@@ -43,8 +43,8 @@ module.exports = (sequelize, DataTypes) => {
     // Ruangan.belongsToMany(Users, {
     //     through: peminjaman,
     //     foreignKey: 'id_ruangan',
-    //   });
-      
+    // });
 
-    return Ruangan; 
+
+    return Ruangan;
 }
