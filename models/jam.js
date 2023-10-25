@@ -9,11 +9,14 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             allowNull: false
         },
-        jam: {
-            type: DataTypes.TIME,
-        },
         id_ruangan: {
             type: DataTypes.INTEGER
+        },
+        tanggal:{
+            type: DataTypes.DATEONLY
+        },
+        jam: {
+            type: DataTypes.TIME,
         },
         createdAt: {
             type: DataTypes.DATE,

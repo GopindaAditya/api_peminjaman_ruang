@@ -10,11 +10,14 @@ module.exports = {
         autoIncrement:true,
         allowNull:false
       },
-      jam:{
-        type:Sequelize.TIME,
-      },
       id_ruangan:{
         type:Sequelize.INTEGER
+      },
+      tanggal:{
+        type:Sequelize.DATEONLY
+      },
+      jam:{
+        type:Sequelize.TIME,
       },
       status_ruangan:{
         type:Sequelize.ENUM('0','1')
@@ -41,11 +44,8 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+    
+    await queryInterface.dropTable('jam');
+     
   }
 };
