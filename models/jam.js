@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
         jam: {
             type: DataTypes.TIME,
         },
+        status_ruangan:{
+            type: DataTypes.ENUM('0','1'),
+            defaultValue: '0'
+        },
         createdAt: {
             type: DataTypes.DATE,
             allowNull: false
