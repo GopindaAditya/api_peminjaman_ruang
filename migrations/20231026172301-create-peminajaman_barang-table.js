@@ -10,7 +10,7 @@ module.exports = {
         autoIncrement:true,
         primaryKey:true
       },
-      id_peminajaman_ruangan:{
+      id_peminjaman_ruangan:{
         type:Sequelize.INTEGER,
         allowNull:false
       },
@@ -32,7 +32,16 @@ module.exports = {
         allowNull:false
       },
     });
-    
+    await queryInterface.addConstraint('peminjaman_barang', {
+      fields: ['id_peminajaman_ruangan'],
+      type: 'foreign key',
+      references: {
+        table: 'peminjaman',
+        field: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
   },
 
   async down (queryInterface, Sequelize) {

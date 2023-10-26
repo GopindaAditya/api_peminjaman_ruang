@@ -2,17 +2,20 @@ var express = require('express');
 var router = express.Router();
 const Validator = require('fastest-validator');
 const v = new Validator();
-const { Ruangan, Peminjaman, Jam, User, Sequelize } = require('../models');
+const { Ruangan, Peminjaman, Jam, User, Sequelize, Peminjaman_barang } = require('../models');
 
 router.post('/:id', async (req, res, next) => {
-    const { tanggal, jam_peminjaman, jam_selesai_peminjaman } = req.body;
+    const { tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
     const ruanganId = req.params.id;
     req.body.id_ruangan = ruanganId;
+    
     try {
-        const peminjaman = await Peminjaman.create(req.body)
-
+        // Membuat peminjaman ruangan
+        const peminjamanRuangan = await Peminjaman.create(req.body);
+        
+        // Mengubah status jam ruangan menjadi '1' (sudah dipesan)
         await Jam.update(
-            { status_ruangan: '1' }, // Mengubah status menjadi '1' (sudah dipesan)
+            { status_ruangan: '1' },
             {
                 where: {
                     tanggal,
@@ -24,21 +27,33 @@ router.post('/:id', async (req, res, next) => {
             }
         );
 
+        // Menyimpan data peminjaman barang
+        const peminjamanBarangPromises = barang.map(async (item) => {
+            // Menyimpan data peminjaman barang terkait dengan id_peminjaman_ruangan yang baru saja dibuat
+            await Peminjaman_barang.create({
+                id_peminjaman_ruangan: peminjamanRuangan.id, // Menggunakan ID peminjaman ruangan yang baru saja dibuat
+                barang: item.barang,
+                jumlah: item.jumlah
+            });
+        });
+
+        // Menunggu semua operasi penyimpanan peminjaman barang selesai
+        await Promise.all(peminjamanBarangPromises);
+
         res.json({
             status: 200,
             message: "Success add data",
-            data: peminjaman
-        })
+            data: peminjamanRuangan
+        });
     } catch (error) {
-        console.log(error);
-        res.status(500).json("Eror");
+        console.error(error);
+        res.status(500).json("Error");
     }
 });
 
-
 router.put('/:id', async (req, res, next) => {
     const peminjamanId = req.params.id;
-    const action = req.body;
+    const action = req.body.action;
 
     try {
         const peminjaman = await Peminjaman.findByPk(peminjamanId);
@@ -46,16 +61,24 @@ router.put('/:id', async (req, res, next) => {
         if (!peminjaman) {
             return res.status(404).json("Data not found");
         }
-
-        if (action === 'terima') {
+        
+        if (action == '1') {
             await peminjaman.update({
                 status_peminjaman: '1'
             })
+            await Peminjaman_barang.update(
+                { status: '1' },
+                { where: { id_peminjaman_ruangan: peminjamanId } }
+            );
         } else {
             await peminjaman.update({
                 status_peminjaman: '-1'
             })
-
+            
+            await Peminjaman_barang.update(
+                { status: '-1' },
+                { where: { id_peminjaman_ruangan: peminjamanId } }
+            );
             const { tanggal, jam_peminjaman, jam_selesai_peminjaman, id_ruangan } = peminjaman;
             Jam.update(
                 { status_ruangan: '0' },
@@ -69,6 +92,7 @@ router.put('/:id', async (req, res, next) => {
                     }
                 }
             )
+            
         }
         res.json({
             status: 200,
