@@ -15,15 +15,19 @@ module.exports = (sequelize, DataTypes) =>{
           id_ruangan:{
             type:DataTypes.INTEGER
           },
+          tanggal:{
+            type:DataTypes.DATEONLY
+          },
           jam_peminjaman:{
-            type:DataTypes.DATE,
+            type:DataTypes.TIME,
             allowNull:false
           },
           jam_selesai_peminjaman:{
-            type:DataTypes.DATE
+            type:DataTypes.TIME
           },
           status_peminjaman:{
-            type:DataTypes.ENUM('0','1','-1')
+            type:DataTypes.ENUM('0','1','-1'),
+            defaultValue: '0'
           },
           createdAt:{
             type:DataTypes.DATE,

@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users');
 var ruanganRouter = require('./routes/ruangan');
 var barangRouter = require('./routes/barang');
 var jamRouter = require('./routes/jam');
+var peminjamanRouter = require('./routes/peminjaman');
 
 var app = express();
 app.use(cors());
@@ -25,5 +26,6 @@ app.use('/users', usersRouter);
 app.use('/ruangan', ruanganRouter);
 app.use('/barang', barangRouter);
 app.use('/jam', jamRouter)
+app.use('/peminjaman', peminjamanRouter);
 
 module.exports = app;

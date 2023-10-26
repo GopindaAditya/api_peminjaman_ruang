@@ -17,15 +17,18 @@ module.exports = {
       id_ruangan:{
         type:Sequelize.INTEGER
       },
+      tanggal:{
+        type:Sequelize.DATEONLY
+      },
       jam_peminjaman:{
-        type:Sequelize.DATE,
+        type:Sequelize.TIME,
         allowNull:false
       },
       jam_selesai_peminjaman:{
-        type:Sequelize.DATE
+        type:Sequelize.TIME
       },
       status_peminjaman:{
-        type:Sequelize.ENUM('0','1','-1')
+        type:Sequelize.ENUM('0','1','-1'),
       },
       createdAt:{
         type:Sequelize.DATE,
