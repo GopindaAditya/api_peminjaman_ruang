@@ -73,7 +73,7 @@ router.put('/:id', async (req, res, next) => {
     res.json({
         status: 200,
         message: "Success update data",
-        data: ruangan,
+        data: updatedRuangan,
     });
 });
 

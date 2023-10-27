@@ -4,6 +4,18 @@ const Validator = require('fastest-validator');
 const v = new Validator();
 const { Ruangan, Peminjaman, Jam, User, Sequelize, Peminjaman_barang } = require('../models');
 
+router.get('/', async(req, res, next)=>{
+    const peminjaman = await Peminjaman.findAll({
+        where:{status_peminjaman:'0'}
+    })
+
+    return res.json({
+        status:200,
+        message:"Get data success",
+        data:peminjaman
+    });
+});
+
 router.post('/:id', async (req, res, next) => {
     const { tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
     const ruanganId = req.params.id;
@@ -109,13 +121,14 @@ router.get('/cari', async (req, res) => {
     
     try {
         // Jika jam tidak disertakan, cari ruangan yang tersedia sepanjang hari
-        const jadwalQuery = jam ? { jam: { [Sequelize.Op.lte]: jam } } : {};
+        // const jadwalQuery = jam ? { jam: { [Sequelize.Op.lte]: jam } } : {};
+        const jadwalQuery = jam ? { jam: jam } : {};
 
         // Temukan semua ruangan yang tersedia pada tanggal dan jam yang ditentukan
         const ruanganTersedia = await Jam.findAll({
             where: {
                 tanggal,
-                status_ruangan: '0', // Status ruangan harus '0' (tersedia)
+                status_ruangan: '0', 
                 ...jadwalQuery,
             },
             attributes: ['id_ruangan'], // Hanya ambil ID ruangan yang tersedia
@@ -132,14 +145,15 @@ router.get('/cari', async (req, res) => {
             },
         });
 
+        // if (!ruanganInfo.length) {
+        //     res.status(404).json("data not found")
+        // }
         res.json({ ruanganTersedia: ruanganInfo });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Terjadi kesalahan saat mencari ruangan yang tersedia.' });
     }
 });
-
-
 
 
 module.exports = router;
