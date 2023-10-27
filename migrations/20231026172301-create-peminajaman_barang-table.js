@@ -33,7 +33,7 @@ module.exports = {
       },
     });
     await queryInterface.addConstraint('peminjaman_barang', {
-      fields: ['id_peminajaman_ruangan'],
+      fields: ['id_peminjaman_ruangan'],
       type: 'foreign key',
       references: {
         table: 'peminjaman',
