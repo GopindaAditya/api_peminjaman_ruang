@@ -5,9 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Validator = require("fastest-validator");
 const v = new Validator();
-const { Users, Sequelize } = require("../models");
+const { Users } = require("../models");
 const authenticateToken = require("../middleware/authMiddleware");
-const { route } = require("./users");
 
 router.post("/register", async (req, res) => {
   const schema = {
@@ -27,6 +26,33 @@ router.post("/register", async (req, res) => {
     message: "Success create data ",
     data: user,
   });
+});
+
+router.put('/edit',authenticateToken,  async(req, res, next)=>{
+  try {
+    const userId = req.user.id;
+    
+    const schema = {
+      'name':'string',
+      'nim':'number',
+      'telepon' : "string",      
+    };
+
+    const validate = v.validate(req.body, schema);
+    if (validate.lenght) {
+      res.status(400).json(validate)
+    }
+    const user = await Users.update(req.body,{where:{ id:userId}});
+    res.json({
+      statsu:200,
+      message:"success update data",
+      data:user
+    });
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
 });
 
 router.post("/login", async (req, res) => {
