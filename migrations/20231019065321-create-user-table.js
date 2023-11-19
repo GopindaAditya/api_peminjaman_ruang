@@ -1,42 +1,58 @@
+// migrations/YYYYMMDDHHmmss-create-users.js
+
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
+const bcrypt = require('bcryptjs');
+
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('users', {
-      id:{
-        type:Sequelize.INTEGER,
-        primaryKey:true,
-        autoIncrement:true,
-        allowNull:false
-      }, 
-      name:{
-        type:Sequelize.STRING,
+      id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
       },
-      nim:{
-        type:Sequelize.STRING
+      name: {
+        type: Sequelize.STRING,
       },
-      telepon:{
-        type:Sequelize.STRING
+      nim: {
+        type: Sequelize.STRING,
       },
-      role:{
-        type:Sequelize.ENUM('peminjam','admin', 'sekretariat' )
+      telepon: {
+        type: Sequelize.STRING,
       },
-      createdAt:{
-        type:Sequelize.DATE,
-        allowNull:false
+      role: {
+        type: Sequelize.ENUM('peminjam', 'admin', 'sekretariat'),
       },
-      updatedAt:{
-        type:Sequelize.DATE,
-        allowNull:false
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
       },
     });
 
+    // Insert a default admin user
+    const password = await bcrypt.hash('adminpassword', 10);
+    await queryInterface.bulkInsert('users', [{
+      name: 'Admin',
+      nim: 'admin',
+      telepon: 'adminphone',
+      role: 'admin',
+      password,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }], {});
   },
 
-  async down (queryInterface, Sequelize) {
-
-     await queryInterface.dropTable('users');
-    
-  }
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('users');
+  },
 };
