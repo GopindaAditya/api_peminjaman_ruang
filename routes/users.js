@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Validator = require("fastest-validator");
 const v = new Validator();
-const { Users } = require("../models");
+const { Users, sequelize } = require("../models");
 const authenticateToken = require("../middleware/authMiddleware");
 
 router.post("/register", async (req, res) => {

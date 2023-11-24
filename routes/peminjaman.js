@@ -11,6 +11,7 @@ const {
   Peminjaman_barang,
   sequelize,
 } = require("../models");
+const authenticateToken = require("../middleware/authMiddleware");
 
 router.get("/", async (req, res, next) => {
   const peminjaman = await Peminjaman.findAll({
@@ -24,12 +25,29 @@ router.get("/", async (req, res, next) => {
   });
 });
 
-router.post("/:id", async (req, res, next) => {
+router.post("/:id",authenticateToken, async (req, res, next) => {
   const { tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
   const ruanganId = req.params.id;
+  const userId = req.user.id;
   req.body.id_ruangan = ruanganId;
+  req.body.id_peminjam = userId;
 
   try {
+
+    const jam = await Jam.findAll(      
+      {
+        where: {
+          tanggal,
+          jam: {
+            [Sequelize.Op.between]: [jam_peminjaman, jam_selesai_peminjaman],
+          },
+          id_ruangan: ruanganId,
+        },
+      }
+    );
+    if (jam.status_ruangan == '1') {
+      res.status(400).json('ruangan sudah dipesan')
+    }
     // Membuat peminjaman ruangan
     const peminjamanRuangan = await Peminjaman.create(req.body);
 
@@ -37,7 +55,7 @@ router.post("/:id", async (req, res, next) => {
     const peminjamanBarangPromises = barang.map(async (item) => {
       // Menyimpan data peminjaman barang terkait dengan id_peminjaman_ruangan yang baru saja dibuat
       await Peminjaman_barang.create({
-        id_peminjaman_ruangan: peminjamanRuangan.id, // Menggunakan ID peminjaman ruangan yang baru saja dibuat
+        id_peminjaman_ruangan: peminjamanRuangan.id,
         barang: item.barang,
         jumlah: item.jumlah,
       });
@@ -53,7 +71,11 @@ router.post("/:id", async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json("Error");
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message, // Include the error message for debugging
+    });
   }
 });
 
@@ -62,6 +84,13 @@ router.put("/:id", async (req, res, next) => {
   const action = req.body.status;
 
   try {
+    // Access user information from req.user
+    const userRole = req.user.role;
+
+    // Check if the user has the required role
+    if (userRole !== "sekretariat") {
+      return res.status(403).json({ message: "Forbidden. Insufficient role." });
+    }
     const peminjaman = await Peminjaman.findByPk(peminjamanId);
 
     if (!peminjaman) {
