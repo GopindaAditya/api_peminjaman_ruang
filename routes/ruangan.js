@@ -39,7 +39,7 @@ router.get("/:id", async(req, res, next)=>{
 router.post('/', async (req, res, next) => {
     const schema = {
       nama_ruangan: 'string',
-      kapasitas: 'number',
+      kapasitas: 'string',
       desc: 'string'
     };
   
