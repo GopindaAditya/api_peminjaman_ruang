@@ -254,7 +254,7 @@ router.put("/:id", async (req, res, next) => {
 });
 
 router.get("/search", async (req, res) => {
-  const { tanggal, jam } = req.query;
+  const { tanggal } = req.query;
 
   try {        
     // Temukan semua ruangan yang tersedia pada tanggal dan jam yang ditentukan
@@ -263,23 +263,26 @@ router.get("/search", async (req, res) => {
         tanggal,
         status_ruangan: "0",        
       },
-      attributes: ["id_ruangan"], 
+      attributes: ["id_ruangan", "jam"], // Tambahkan "jam" sebagai atribut yang diambil
       raw: true, 
     });
 
-    // Ambil ID ruangan yang tersedia dari hasil pencarian
+    // Ambil ID ruangan dan jam yang tersedia dari hasil pencarian
     const ruanganTersediaIds = ruanganTersedia.map(
-      (ruangan) => ruangan.id_ruangan
+      (ruangan) => ({
+        id_ruangan: ruangan.id_ruangan,
+        jam: ruangan.jam,
+      })
     );
 
     // Temukan informasi lengkap tentang ruangan-ruangan yang tersedia
     const ruanganInfo = await Ruangan.findAll({
       where: {
-        id: ruanganTersediaIds,
+        id: ruanganTersediaIds.map((ruangan) => ruangan.id_ruangan),
       },
     });
     
-    res.json({ ruanganTersedia: ruanganInfo });
+    res.json({ ruanganTersedia: ruanganInfo, jam: ruanganTersediaIds });
   } catch (error) {
     console.error(error);
     res.status(500).json({
