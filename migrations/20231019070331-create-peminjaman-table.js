@@ -56,7 +56,7 @@ module.exports = {
         table: 'ruangan',
         field: 'id',
       },
-      onDelete: 'CASCADE',
+      onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
     });
   },

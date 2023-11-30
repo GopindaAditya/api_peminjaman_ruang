@@ -25,8 +25,10 @@ router.get("/", async (req, res, next) => {
   });
 });
 
+
+
 router.post("/:id",authenticateToken, async (req, res, next) => {
-  const { tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
+  const {tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
   const ruanganId = req.params.id;
   const userId = req.user.id;
   req.body.id_ruangan = ruanganId;
@@ -160,7 +162,7 @@ router.put("/:id", async (req, res, next) => {
           const rejectionMessage = `Pemesanan Ruangan untuk tanggal ${conflictingReservation.tanggal}, jam ${conflictingReservation.jam_peminjaman} - ${conflictingReservation.jam_selesai_peminjaman}, ruangan ID ${id_ruangan}, DITOLAK.`;
 
           const rejectionData = new FormData();
-          rejectionData.append("target", "089638647717");
+          rejectionData.append("target", "087771682765");
           rejectionData.append("message", rejectionMessage);
           rejectionData.append(
             "url",
@@ -251,23 +253,18 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
-router.get("/cari", async (req, res) => {
+router.get("/search", async (req, res) => {
   const { tanggal, jam } = req.query;
 
-  try {
-    // Jika jam tidak disertakan, cari ruangan yang tersedia sepanjang hari
-    // const jadwalQuery = jam ? { jam: { [Sequelize.Op.lte]: jam } } : {};
-    const jadwalQuery = jam ? { jam: jam } : {};
-
+  try {        
     // Temukan semua ruangan yang tersedia pada tanggal dan jam yang ditentukan
     const ruanganTersedia = await Jam.findAll({
       where: {
         tanggal,
-        status_ruangan: "0",
-        ...jadwalQuery,
+        status_ruangan: "0",        
       },
-      attributes: ["id_ruangan"], // Hanya ambil ID ruangan yang tersedia
-      raw: true, // Mengembalikan hasil dalam bentuk objek biasa, bukan instance Sequelize
+      attributes: ["id_ruangan"], 
+      raw: true, 
     });
 
     // Ambil ID ruangan yang tersedia dari hasil pencarian
@@ -281,10 +278,7 @@ router.get("/cari", async (req, res) => {
         id: ruanganTersediaIds,
       },
     });
-
-    // if (!ruanganInfo.length) {
-    //     res.status(404).json("data not found")
-    // }
+    
     res.json({ ruanganTersedia: ruanganInfo });
   } catch (error) {
     console.error(error);
