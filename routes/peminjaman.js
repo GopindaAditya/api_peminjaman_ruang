@@ -11,6 +11,7 @@ const {
   Peminjaman_barang,
   sequelize,
 } = require("../models");
+const { Op } = require('sequelize');
 const authenticateToken = require("../middleware/authMiddleware");
 
 router.get("/", async (req, res, next) => {
@@ -27,12 +28,12 @@ router.get("/", async (req, res, next) => {
 
 
 
-router.post("/:id",authenticateToken, async (req, res, next) => {
-  const {tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
+router.post("/:id", async (req, res, next) => {
+  const { id_peminjam, tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
   const ruanganId = req.params.id;
-  const userId = req.user.id;
+  // const userId = req.user.id;
   req.body.id_ruangan = ruanganId;
-  req.body.id_peminjam = userId;
+  // req.body.id_peminjam = userId;
 
   try {
 
@@ -87,12 +88,12 @@ router.put("/:id", async (req, res, next) => {
 
   try {
     // Access user information from req.user
-    const userRole = req.user.role;
+    // const userRole = req.user.role;
 
-    // Check if the user has the required role
-    if (userRole !== "sekretariat") {
-      return res.status(403).json({ message: "Forbidden. Insufficient role." });
-    }
+    // // Check if the user has the required role
+    // if (userRole !== "sekretariat") {
+    //   return res.status(403).json({ message: "Forbidden. Insufficient role." });
+    // }
     const peminjaman = await Peminjaman.findByPk(peminjamanId);
 
     if (!peminjaman) {
@@ -299,5 +300,25 @@ router.get("/search", async (req, res) => {
     });
   }
 });
+
+router.get("/riwayat", async (req, res, next) => {
+  try {
+    const riwayat = await Peminjaman.findAll({
+      where: {
+        status_peminjaman: {
+          [Op.ne]: '0'
+        }
+      }
+    });
+
+    res.json({ riwayat });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Terjadi kesalahan saat mengambil riwayat peminjaman.",
+    });
+  }
+});
+
 
 module.exports = router;
