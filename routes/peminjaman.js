@@ -267,22 +267,31 @@ router.get("/search", async (req, res) => {
       raw: true, 
     });
 
-    // Ambil ID ruangan dan jam yang tersedia dari hasil pencarian
-    const ruanganTersediaIds = ruanganTersedia.map(
-      (ruangan) => ({
-        id_ruangan: ruangan.id_ruangan,
-        jam: ruangan.jam,
-      })
-    );
+    // Buat objek untuk menyimpan jam berdasarkan id_ruangan
+    const jamPerRuangan = {};
+
+    // Kelompokkan jam berdasarkan id_ruangan
+    ruanganTersedia.forEach((ruangan) => {
+      if (!jamPerRuangan[ruangan.id_ruangan]) {
+        jamPerRuangan[ruangan.id_ruangan] = [];
+      }
+      jamPerRuangan[ruangan.id_ruangan].push(ruangan.jam);
+    });
 
     // Temukan informasi lengkap tentang ruangan-ruangan yang tersedia
     const ruanganInfo = await Ruangan.findAll({
       where: {
-        id: ruanganTersediaIds.map((ruangan) => ruangan.id_ruangan),
+        id: Object.keys(jamPerRuangan),
       },
     });
+
+    // Gabungkan informasi ruangan dan jam menjadi satu objek JSON
+    const response = ruanganInfo.map((ruangan) => ({
+      ...ruangan.toJSON(),
+      jam: jamPerRuangan[ruangan.id] || [],
+    }));
     
-    res.json({ ruanganTersedia: ruanganInfo, jam: ruanganTersediaIds });
+    res.json({ ruanganTersedia: response });
   } catch (error) {
     console.error(error);
     res.status(500).json({
