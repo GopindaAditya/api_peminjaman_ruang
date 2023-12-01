@@ -54,18 +54,18 @@ router.post("/:id", async (req, res, next) => {
     // Membuat peminjaman ruangan
     const peminjamanRuangan = await Peminjaman.create(req.body);
 
-    // Menyimpan data peminjaman barang
-    const peminjamanBarangPromises = barang.map(async (item) => {
-      // Menyimpan data peminjaman barang terkait dengan id_peminjaman_ruangan yang baru saja dibuat
-      await Peminjaman_barang.create({
-        id_peminjaman_ruangan: peminjamanRuangan.id,
-        barang: item.barang,
-        jumlah: item.jumlah,
-      });
-    });
+    // // Menyimpan data peminjaman barang
+    // const peminjamanBarangPromises = barang.map(async (item) => {
+    //   // Menyimpan data peminjaman barang terkait dengan id_peminjaman_ruangan yang baru saja dibuat
+    //   await Peminjaman_barang.create({
+    //     id_peminjaman_ruangan: peminjamanRuangan.id,
+    //     barang: item.barang,
+    //     jumlah: item.jumlah,
+    //   });
+    // });
 
     // Menunggu semua operasi penyimpanan peminjaman barang selesai
-    await Promise.all(peminjamanBarangPromises);
+    // await Promise.all(peminjamanBarangPromises);
 
     res.json({
       status: 200,
@@ -261,10 +261,9 @@ router.get("/search", async (req, res) => {
     // Temukan semua ruangan yang tersedia pada tanggal dan jam yang ditentukan
     const ruanganTersedia = await Jam.findAll({
       where: {
-        tanggal,
-        status_ruangan: "0",        
+        tanggal                
       },
-      attributes: ["id_ruangan", "jam"], // Tambahkan "jam" sebagai atribut yang diambil
+      attributes: ["id_ruangan", "jam", "status_ruangan"], // Tambahkan "jam" dan "status_ruangan" sebagai atribut yang diambil
       raw: true, 
     });
 
@@ -276,7 +275,10 @@ router.get("/search", async (req, res) => {
       if (!jamPerRuangan[ruangan.id_ruangan]) {
         jamPerRuangan[ruangan.id_ruangan] = [];
       }
-      jamPerRuangan[ruangan.id_ruangan].push(ruangan.jam);
+      jamPerRuangan[ruangan.id_ruangan].push({
+        jam: ruangan.jam,
+        status_ruangan: ruangan.status_ruangan,
+      });
     });
 
     // Temukan informasi lengkap tentang ruangan-ruangan yang tersedia
@@ -319,6 +321,8 @@ router.get("/riwayat", async (req, res, next) => {
     });
   }
 });
+
+// router.put("/")
 
 
 module.exports = router;
