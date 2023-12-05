@@ -8,6 +8,7 @@ const v = new Validator();
 const { Users, sequelize } = require("../models");
 const authenticateToken = require("../middleware/authMiddleware");
 const { route } = require("./peminjaman");
+const { where } = require("sequelize");
 
 router.post("/register/user", async (req, res) => {
   const schema = {
@@ -75,6 +76,20 @@ router.put("/edit", authenticateToken, async (req, res, next) => {
     console.log(error);
     res.status(500).json(error);
   }
+});
+
+router.get('/sekretariat', async (req,res)=>{
+  const user = await Users.findAll({
+    where : {role: "sekretariat"}
+  });
+  if (!user) {
+    es.status(404).json("Data Not Found");
+  }
+  res.json({
+    statsu: 200,
+    message: "success get data",
+    data: user,
+  });
 });
 
 router.post("/login", async (req, res) => {

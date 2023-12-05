@@ -330,6 +330,8 @@ router.get("/riwayat", async (req, res, next) => {
   }
 });
 
+const sleep = require('system-sleep');
+
 router.put("/send/:id", async (req, res, next) => {
 
   let lastRequestTime = null;
@@ -351,6 +353,9 @@ router.put("/send/:id", async (req, res, next) => {
     data.append("countryCode", "62");
 
     try {
+      // Menunda eksekusi selama 2 detik (2000 milidetik)
+      sleep(60000);
+
       const response = await fetch("https://api.fonnte.com/send", {
         method: "POST",
         mode: "cors",
