@@ -7,6 +7,7 @@ const Validator = require("fastest-validator");
 const v = new Validator();
 const { Users, sequelize } = require("../models");
 const authenticateToken = require("../middleware/authMiddleware");
+const { route } = require("./peminjaman");
 
 router.post("/register/user", async (req, res) => {
   const schema = {
@@ -20,7 +21,7 @@ router.post("/register/user", async (req, res) => {
   if (validete.lenght) {
     res.status(400).json(validete);
   }
-  
+
   const user = await Users.create(req.body);
   res.json({
     status: 200,
@@ -31,18 +32,17 @@ router.post("/register/user", async (req, res) => {
 
 router.post("/register/sekretariat", async (req, res) => {
   const schema = {
-    name: "string",        
+    name: "string",
     password: "string",
   };
 
-  
   const validete = v.validate(req.body, schema);
   if (validete.lenght) {
     res.status(400).json(validete);
   }
-  
-  req.body.role = "sekretariat"
-  req.body.telepon = "08112661144"
+
+  req.body.role = "sekretariat";
+  req.body.telepon = "08112661144";
   const user = await Users.create(req.body);
   res.json({
     status: 200,
@@ -51,27 +51,26 @@ router.post("/register/sekretariat", async (req, res) => {
   });
 });
 
-router.put('/edit',authenticateToken,  async(req, res, next)=>{
+router.put("/edit", authenticateToken, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    
+
     const schema = {
-      'name':'string|optional',
-      'nim':'number|optional',
-      'telepon' : "string|optional",      
+      name: "string|optional",
+      nim: "number|optional",
+      telepon: "string|optional",
     };
 
     const validate = v.validate(req.body, schema);
     if (validate.lenght) {
-      res.status(400).json(validate)
+      res.status(400).json(validate);
     }
-    const user = await Users.update(req.body,{where:{ id:userId}});
+    const user = await Users.update(req.body, { where: { id: userId } });
     res.json({
-      statsu:200,
-      message:"success update data",
-      data:user
+      statsu: 200,
+      message: "success update data",
+      data: user,
     });
-    
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
@@ -102,21 +101,35 @@ router.post("/login", async (req, res) => {
       }
     );
 
-    res.cookie('jwt', token, { httpOnly: true });
+    res.cookie("jwt", token, { httpOnly: true });
     res.json({ token });
   } else {
     res.status(401).json({ message: "Invalid credentials" });
   }
 });
 
-router.post("/logout",authenticateToken, (req, res) => {
+router.delete("/:id", async (req, res) => {
+  const userId = req.params.id;
+  let user = await Users.findByPk(userId);
+  if (!user) {
+    return res.status(404).json({ status: 404, message: "Data not found" });
+  }
+
+  await user.destroy();
+  res.json({
+    status: 200,
+    message: "Delete Data Success",
+  });
+});
+
+router.post("/logout", authenticateToken, (req, res) => {
   // Assuming you're using tokens stored in cookies
-  res.clearCookie('jwt'); // Clear the JWT cookie on the client
+  res.clearCookie("jwt"); // Clear the JWT cookie on the client
 
   // You might also want to keep track of invalidated tokens on the server
   // and add logic to block access for tokens that are marked as invalidated.
-  
-  res.json({ message: 'Logout successful' });
+
+  res.json({ message: "Logout successful" });
 });
 
 router.get("/profile", authenticateToken, async (req, res) => {
@@ -124,6 +137,5 @@ router.get("/profile", authenticateToken, async (req, res) => {
 
   res.json({ user });
 });
-
 
 module.exports = router;
