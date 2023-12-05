@@ -93,6 +93,18 @@ router.get('/sekretariat', async (req,res)=>{
   });
 });
 
+router.get('/sekretariat/:id', async (req,res)=>{
+  const user = await Users.findByPk(req.params.id);
+  if (!user) {
+    es.status(404).json("Data Not Found");
+  }
+  res.json({
+    statsu: 200,
+    message: "success get data",
+    data: user,
+  });
+});
+
 router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
 
