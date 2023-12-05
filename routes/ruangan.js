@@ -125,7 +125,7 @@ router.delete('/:id', async(req, res, next)=>{
         return res.status(404).json({status:404, message:"Data not found"})
     }
 
-    await ruangan.destroy();
+    await ruangan.update({status_ruangan:"nonaktif"});
     res.json({
         status:200,
         message:"Delete Data Success"
