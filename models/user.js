@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, {
-    tableName: 'users',
+    tableName: 'users',    
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {
@@ -52,7 +52,6 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
   });
-  
 
   return Users;
 };

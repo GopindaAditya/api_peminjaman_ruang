@@ -1,3 +1,4 @@
+require("dotenv").config();
 var express = require("express");
 var router = express.Router();
 const Validator = require("fastest-validator");
@@ -6,7 +7,7 @@ const {
   Ruangan,
   Peminjaman,
   Jam,
-  User,
+  Users,
   Sequelize,
   Peminjaman_barang,
   sequelize,
@@ -28,12 +29,12 @@ router.get("/", async (req, res, next) => {
 
 
 
-router.post("/:id", async (req, res, next) => {
+router.post("/:id",authenticateToken,  async (req, res, next) => {
   const { id_peminjam, tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
   const ruanganId = req.params.id;
-  // const userId = req.user.id;
+  const userId = req.user.id;
   req.body.id_ruangan = ruanganId;
-  // req.body.id_peminjam = userId;
+  req.body.id_peminjam = userId;
 
   try {
 
@@ -82,24 +83,24 @@ router.post("/:id", async (req, res, next) => {
   }
 });
 
-router.put("/:id", async (req, res, next) => {
+router.put("/:id", authenticateToken, async (req, res, next) => {
   const peminjamanId = req.params.id;
   const action = req.body.status;
 
   try {
     // Access user information from req.user
-    // const userRole = req.user.role;
+    const userRole = req.user.role;
 
-    // // Check if the user has the required role
-    // if (userRole !== "sekretariat") {
-    //   return res.status(403).json({ message: "Forbidden. Insufficient role." });
-    // }
+    // Check if the user has the required role
+    if (userRole !== "sekretariat") {
+      return res.status(403).json({ message: "Forbidden. Insufficient role." });
+    }
     const peminjaman = await Peminjaman.findByPk(peminjamanId);
 
     if (!peminjaman) {
       return res.status(404).json("Data not found");
     }
-    const { tanggal, jam_peminjaman, jam_selesai_peminjaman, id_ruangan } =
+    const { tanggal, jam_peminjaman, jam_selesai_peminjaman, id_ruangan, id_peminjam } =
       peminjaman;
 
     const conflictingReservations = await Peminjaman.findAll({
@@ -131,10 +132,10 @@ router.put("/:id", async (req, res, next) => {
         status_peminjaman: "1",
       });
 
-      await Peminjaman_barang.update(
-        { status: "1" },
-        { where: { id_peminjaman_ruangan: peminjamanId } }
-      );
+      // await Peminjaman_barang.update(
+      //   { status: "1" },
+      //   { where: { id_peminjaman_ruangan: peminjamanId } }
+      // );
 
       await Jam.update(
         { status_ruangan: "1" },
@@ -154,16 +155,22 @@ router.put("/:id", async (req, res, next) => {
             status_peminjaman: "-1",
           });
           // Update status for Peminjaman_barang
-          await Peminjaman_barang.update(
-            { status: "-1" },
-            { where: { id_peminjaman_ruangan: conflictingReservation.id } }
-          );
+          // await Peminjaman_barang.update(
+          //   { status: "-1" },
+          //   { where: { id_peminjaman_ruangan: conflictingReservation.id } }
+          // );
 
           // Send rejection message via WhatsApp
           const rejectionMessage = `Pemesanan Ruangan untuk tanggal ${conflictingReservation.tanggal}, jam ${conflictingReservation.jam_peminjaman} - ${conflictingReservation.jam_selesai_peminjaman}, ruangan ID ${id_ruangan}, DITOLAK.`;
-
+          console.log(conflictingReservation.id_peminjam);
+          const userReject = await Users.findByPk(conflictingReservation.id_peminjam)
+          if (!userReject) {
+            // Handle the case when the user is not found
+            return res.status(404).json("User not found");
+          }
+          
           const rejectionData = new FormData();
-          rejectionData.append("target", "087771682765");
+          rejectionData.append("target", userReject.telepon);
           rejectionData.append("message", rejectionMessage);
           rejectionData.append(
             "url",
@@ -190,10 +197,11 @@ router.put("/:id", async (req, res, next) => {
 
       await Promise.all(rejectPromises);
       const message = `Pemesanan Ruangan sudah diterima untuk tanggal ${tanggal}, jam ${jam_peminjaman} - ${jam_selesai_peminjaman}, ruangan ID ${id_ruangan}.`;
-
+      console.log("id user", id_peminjam);
+      const user = await Users.findByPk(id_peminjam);      
       (async () => {
         const data = new FormData();
-        data.append("target", "085738815164");
+        data.append("target", user.telepon);
         data.append("message", message);
         data.append("url", "https://md.fonnte.com/images/wa-logo.png");
         data.append("filename", "filename.pdf");
@@ -205,7 +213,7 @@ router.put("/:id", async (req, res, next) => {
           method: "POST",
           mode: "cors",
           headers: new Headers({
-            Authorization: "Ph2GJQCYaeAs7yCy8HTW",
+            Authorization: process.env.FONNTE_SECRET_TOKEN,
           }),
           body: data,
         });
@@ -224,10 +232,10 @@ router.put("/:id", async (req, res, next) => {
       );
 
       const message = `Pemesanan Ruangan untuk tanggal ${tanggal}, jam ${jam_peminjaman} - ${jam_selesai_peminjaman}, ruangan ID ${id_ruangan}, DITOLAK.`;
-
+      const user =  await Users.findByPk(id_peminjam)
       (async () => {
         const data = new FormData();
-        data.append("target", "085738815164");
+        data.append("target", user.telepon);
         data.append("message", message);
         data.append("url", "https://md.fonnte.com/images/wa-logo.png");
         data.append("filename", "filename.pdf");
@@ -239,7 +247,7 @@ router.put("/:id", async (req, res, next) => {
           method: "POST",
           mode: "cors",
           headers: new Headers({
-            Authorization: "Ph2GJQCYaeAs7yCy8HTW",
+            Authorization: process.env.FONNTE_SECRET_TOKEN,
           }),
           body: data,
         });
@@ -322,7 +330,46 @@ router.get("/riwayat", async (req, res, next) => {
   }
 });
 
-// router.put("/")
+router.put("/send/:id", async (req, res, next) => {
+
+  let lastRequestTime = null;
+  const delayTimeInSeconds = 60; 
+  const currentTime = new Date().getTime();
+
+  if (!lastRequestTime || currentTime - lastRequestTime >= delayTimeInSeconds * 1000) {
+    // Jika belum ada permintaan sebelumnya atau sudah melewati batas waktu
+    lastRequestTime = currentTime;
+
+    // Logika untuk mengirim pesan dengan penundaan
+    const data = new FormData();
+    data.append("target", "085738815164");
+    data.append("message", "PESAN CONFIRMASI CEK OUT");
+    data.append("url", "https://md.fonnte.com/images/wa-logo.png");
+    data.append("filename", "filename.pdf");    
+    data.append("schedule", "0");
+    data.append("delay", "2");
+    data.append("countryCode", "62");
+
+    try {
+      const response = await fetch("https://api.fonnte.com/send", {
+        method: "POST",
+        mode: "cors",
+        headers: new Headers({
+          Authorization: process.env.FONNTE_SECRET_TOKEN,
+        }),
+        body: data,
+      });
+
+      const jsonResponse = await response.json();
+      res.json(jsonResponse);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  } else {
+    res.status(429).json({ error: "Anda harus menunggu beberapa saat sebelum mengirim pesan lagi." });
+  }
+});
 
 
 module.exports = router;

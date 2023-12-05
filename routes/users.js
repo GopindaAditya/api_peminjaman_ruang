@@ -8,7 +8,7 @@ const v = new Validator();
 const { Users, sequelize } = require("../models");
 const authenticateToken = require("../middleware/authMiddleware");
 
-router.post("/register", async (req, res) => {
+router.post("/register/user", async (req, res) => {
   const schema = {
     name: "string",
     nim: "number",
@@ -20,6 +20,29 @@ router.post("/register", async (req, res) => {
   if (validete.lenght) {
     res.status(400).json(validete);
   }
+  
+  const user = await Users.create(req.body);
+  res.json({
+    status: 200,
+    message: "Success create data ",
+    data: user,
+  });
+});
+
+router.post("/register/sekretariat", async (req, res) => {
+  const schema = {
+    name: "string",
+    nim: "number|optional",
+    telepon: "string",
+    password: "string",
+  };
+
+  const validete = v.validate(req.body, schema);
+  if (validete.lenght) {
+    res.status(400).json(validete);
+  }
+  
+  req.body.role = "sekretariat"
   const user = await Users.create(req.body);
   res.json({
     status: 200,
@@ -33,9 +56,9 @@ router.put('/edit',authenticateToken,  async(req, res, next)=>{
     const userId = req.user.id;
     
     const schema = {
-      'name':'string',
-      'nim':'number',
-      'telepon' : "string",      
+      'name':'string|optional',
+      'nim':'number|optional',
+      'telepon' : "string|optional",      
     };
 
     const validate = v.validate(req.body, schema);
