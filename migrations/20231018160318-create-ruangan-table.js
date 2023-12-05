@@ -20,6 +20,9 @@ module.exports = {
       desc:{
         type:Sequelize.STRING
       },
+      status_ruangan:{
+        type:Sequelize.ENUM("aktif", "nonaktif")        
+      },
       createdAt:{
         type:Sequelize.DATE,
         allowNull:false

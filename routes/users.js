@@ -52,9 +52,9 @@ router.post("/register/sekretariat", async (req, res) => {
   });
 });
 
-router.put("/edit", authenticateToken, async (req, res, next) => {
+router.put("/:id", authenticateToken, async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const userId = req.params.id;
 
     const schema = {
       name: "string|optional",
@@ -77,6 +77,7 @@ router.put("/edit", authenticateToken, async (req, res, next) => {
     res.status(500).json(error);
   }
 });
+
 
 router.get('/sekretariat', async (req,res)=>{
   const user = await Users.findAll({

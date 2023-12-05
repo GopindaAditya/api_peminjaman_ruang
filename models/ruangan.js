@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         desc: {
             type: DataTypes.STRING
         },
+        status_ruangan:{
+            type :DataTypes.ENUM("aktif", "nonaktif"),
+            defaultValue : "aktif"
+        },
         createdAt: {
             type: DataTypes.DATE,
             allowNull: false
