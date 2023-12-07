@@ -130,7 +130,7 @@ router.post("/login", async (req, res) => {
     );
 
     res.cookie("jwt", token, { httpOnly: true });
-    res.json({ token });
+    res.json({ token, user });
   } else {
     res.status(401).json({ message: "Invalid credentials" });
   }

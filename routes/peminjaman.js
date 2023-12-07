@@ -30,7 +30,7 @@ router.get("/", async (req, res, next) => {
 
 
 router.post("/:id",authenticateToken,  async (req, res, next) => {
-  const { id_peminjam, tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
+  const { tanggal, jam_peminjaman, jam_selesai_peminjaman, barang } = req.body;
   const ruanganId = req.params.id;
   const userId = req.user.id;
   req.body.id_ruangan = ruanganId;
